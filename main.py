@@ -6,27 +6,33 @@ import simpleaudio as sa
 
 class AlertFSM:
     def __init__(self):
-        self.states = ['idle', 'DetectingFire', 'FireAlert', 'ownerNotification', 'buzzerRinging']
+        self.states = ['idle', 'DetectingFire', 'FireAlert', 'ownerNotification', 'buzzerRinging','water','fire on/off','911']
         self.current_state = 'idle'
         self.timer = 0  # Initialize timer for fire detection
 
     def transition(self, event):
         transitions = {
+            'default':{'idle':'idle'},
             'smokeDetection': {'idle': 'DetectingFire'},
+            'smokeended':{'DetectingFire':'idle'},
             'smokepresisted': {'DetectingFire': 'DetectingFire'},
             'Alert': {'DetectingFire': 'FireAlert'},
             'ringBuzzer': {'FireAlert': 'buzzerRinging'},
             'sendNotification': {'buzzerRinging': 'ownerNotification'},
-            'reset': {'ownerNotification': 'idle'},
+            'sprinkleWater':{'ownerNotification':'water'},
+            'checkfire':{'water':'fire on/off'},
+            'fireoff':{'fire on/off':'idle'},
+            'fireon':{'fire 0n/off':'911'},
+            '911alerted':{'911':'idle'}
         }
 
         if self.current_state in transitions[event]:
             if self.current_state == 'idle':
                 self.timer = 0
                 self.current_state = transitions[event][self.current_state]
-            if(self.timer>100):
+            elif(self.timer>100):
                 self.current_state = transitions[event][self.current_state]
-
+            #
             elif self.current_state == 'DetectingFire':
                 # Update timer value based on the slider
                 self.current_state = transitions[event][self.current_state]
@@ -37,6 +43,19 @@ class AlertFSM:
             print(f"No transition defined for event {event} in {self.current_state} state.")
 
 fsm = AlertFSM()
+fsm.transition('default')
+fsm.transition('smokeDetection')
+fsm.transition('smokepresisted')
+fsm.transition('Alert')
+fsm.transition('sendNotification')
+fsm.transition('sprinkleWater')
+fsm.transition('checkfire')
+fsm.transition('fireon')
+fsm.transition('911alerted')
+
+
+
+
 
 
 def on_slider_change(value):
