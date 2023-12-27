@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.messagebox
 from tkinter import *
 import math
-import simpleaudio as sa
+
 
 class AlertFSM:
     def __init__(self):
@@ -43,15 +43,7 @@ class AlertFSM:
             print(f"No transition defined for event {event} in {self.current_state} state.")
 
 fsm = AlertFSM()
-fsm.transition('default')
-fsm.transition('smokeDetection')
-fsm.transition('smokepresisted')
-fsm.transition('Alert')
-fsm.transition('sendNotification')
-fsm.transition('sprinkleWater')
-fsm.transition('checkfire')
-fsm.transition('fireon')
-fsm.transition('911alerted')
+
 
 
 
@@ -65,25 +57,46 @@ def on_slider_change(value):
     #print(f"Timer set to: {fsm.timer}")
     if (fsm.timer > 0 and fsm.timer < 58):
         labelGood.config(text="Idle")
+        print("idle")
     elif(fsm.timer>=58 and fsm.timer<90):
         fsm.transition("smokeDetection")
         labelGood.config(text="Smoke Detection")
         labelGood.place(x=132, y=290)
-    elif(fsm.timer>=90 and fsm.timer<=135):
+        print("somked")
+    elif(fsm.timer>=90 and fsm.timer<120):
         fsm.transition("smokepresisted")
         labelGood.config(text="Smoke Presisted")
-    elif (fsm.timer >= 135 and fsm.timer < 180):
-        fsm.transition("smokepresisted")
+        print("smokep")
+    elif (fsm.timer >= 120 and fsm.timer < 180):
         fsm.transition('Alert')
         fsm.transition('ringBuzzer')
-        play_sound()
+        #play_sound()
         fsm.transition('sendNotification')
-        labelGood.config(text="Fire")
-        labelGood.place(x=175, y=290)
-        tkinter.messagebox.showwarning("Fire","FIRE")
-        fsm.transition('reset')
-        slider.set(0)
-        my_upd(0)
+        if (fsm.timer >= 120 and fsm.timer < 155):
+            fsm.transition("sprinkleWater")
+            fsm.transition("checkfire")
+            fsm.transition("fireoff")
+            labelGood.config(text="Handled by water")
+            labelGood.place(x=165, y=290)
+            tkinter.messagebox.showinfo("Fire", "Fire is off")
+            slider.set(0)
+        else:
+            fsm.transition("sprinkleWater")
+            fsm.transition("checkfire")
+            fsm.transition("fireon")
+            fsm.transition("911alerted")
+            labelGood.config(text="Emergency")
+            labelGood.place(x=175, y=290)
+            tkinter.messagebox.showwarning("Fire", "CALL 911")
+            slider.set(0)
+
+
+        # labelGood.config(text="Fire")
+        # labelGood.place(x=175, y=290)
+        # tkinter.messagebox.showwarning("Fire","FIRE")
+        # fsm.transition('reset')
+        # slider.set(0)
+        # my_upd(0)
 # Slider widget
 root = tk.Tk()
 root.geometry("686x391")
@@ -108,6 +121,11 @@ c1.grid(row=0,column=0)
 res=1 # resolution or steps
 #for d in range(0,180,res):
  #   my_c.create_arc(x1, y1,x2,y2, start=d, extent=res+1,outline=my_upd(d),width=arc_w,style=tk.ARC)
+def on_slider_click(event):
+    # Calculate the slider position based on the click event
+    position = event.x / slider_width
+    print(event.x)
+    slider.set(position-30)
 
 def my_upd(value):
     global line
@@ -139,7 +157,9 @@ line=c1.create_line(x,y,(x+r*math.cos(in_radian)),
 # length_label = Label(root, text="Fire")
 slider = tk.Scale(root, from_=0, to=180, orient=tk.HORIZONTAL, command=on_slider_change,length=300,bg='white',showvalue=False,highlightbackground="white")
 slider.grid(row=2,column=0)
-
+slider_width = slider.winfo_width()
+print(slider_width)
+slider.bind("<Button-1>", on_slider_click)
 labelGood=tk.Label(root,font=("Bernard MT Condensed", 16),bg='white')
 labelGood.place(x=175, y=290)
 def play_sound():
