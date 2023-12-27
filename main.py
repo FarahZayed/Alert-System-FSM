@@ -85,6 +85,10 @@ def on_slider_change(value):
             fsm.transition("911alerted")
             labelGood.config(text="Emergency")
             labelGood.place(x=175, y=290)
+            tkinter.messagebox.showinfo("Fire", "FIRE DETECTION")
+            for i in range(10):
+                if i == 5:
+                    break
             tkinter.messagebox.showwarning("Fire", "CALL 911")
             play_sound()
             slider.set(0)
